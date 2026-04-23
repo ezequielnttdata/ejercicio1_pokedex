@@ -1,0 +1,19 @@
+# Composer
+/vendor/
+
+# Drupal public files
+/web/sites/default/files/
+
+# Node
+/node_modules/
+
+# Entorno
+.env
+.ddev/
+
+# Logs
+*.log
+
+# Sistema
+.DS_Store
+Thumbs.db
