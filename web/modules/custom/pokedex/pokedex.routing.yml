@@ -1,0 +1,15 @@
+pokedex.list:
+  path: '/pokedex'
+  defaults:
+    _controller: '\Drupal\pokedex\Controller\PokedexController::list'
+    _title: 'Pokédex'
+  requirements:
+    _permission: 'access content'
+
+pokedex.detail:
+  path: '/pokedex/{pokemon}'
+  defaults:
+    _controller: '\Drupal\pokedex\Controller\PokedexController::detail'
+  requirements:
+    _permission: 'access content'
+    pokemon: '[a-z0-9\-]+'

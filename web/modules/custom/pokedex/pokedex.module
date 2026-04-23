@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * @file
+ * Módulo Pokédex para Drupal 11.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function pokedex_theme($existing, $type, $theme, $path) {
+  return [
+    'pokedex_list' => [
+      'variables' => [
+        'status' => 'success',
+        'items' => [],
+        'page' => 1,
+        'has_previous' => FALSE,
+        'has_next' => FALSE,
+        'error_message' => '',
+        'total_count' => 0,
+        'search_term' => '',
+        'type_filter' => '',
+        'available_types' => [],
+      ],
+    ],
+    'pokedex_detail' => [
+      'variables' => [
+        'status' => 'success',
+        'pokemon' => [],
+        'error_message' => '',
+        'page' => 1,
+      ],
+    ],
+  ];
+}

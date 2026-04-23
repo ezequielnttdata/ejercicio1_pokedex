@@ -1,0 +1,5 @@
+name: 'Pokédex'
+type: module
+description: 'Módulo custom para mostrar una Pokédex consumiendo datos de PokéAPI'
+core_version_requirement: ^11
+package: Custom

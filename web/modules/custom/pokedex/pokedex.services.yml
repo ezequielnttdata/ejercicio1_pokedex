@@ -1,0 +1,4 @@
+services:
+  pokedex.pokeapi:
+    class: Drupal\pokedex\Service\PokeApiService
+    arguments: ['@http_client', '@logger.factory']
