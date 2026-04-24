@@ -1,0 +1,11 @@
+pokedex_libraries:
+  version: 1.0.0
+  css:
+    theme:
+      css/pokedex.css: {}
+
+pokedex_detail_libraries:
+  version: 1.0.0
+  css:
+    theme:
+      css/pokedex_detail.css: {}

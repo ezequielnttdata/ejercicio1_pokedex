@@ -37,6 +37,8 @@ Esta prueba técnica evalúa:
 - ✅ Conocimiento de Render Arrays y sistema de templates
 - ✅ Uso correcto de servicios y controllers
 - ✅ Código limpio y mantenible
+- ✅ Implementación de Drupal Libraries para assets (CSS/JS)
+- ✅ UI/UX mejorada con diseño temático
 
 ### 1.3 Stack Tecnológico
 
@@ -347,6 +349,7 @@ web/modules/custom/pokedex/
 ├── pokedex.info.yml          # Metadata del módulo
 ├── pokedex.routing.yml       # Definición de rutas
 ├── pokedex.services.yml      # Registro de servicios en DI container
+├── pokedex.libraries.yml     # Definición de libraries (CSS)
 ├── pokedex.module            # Hooks de Drupal (hook_theme)
 │
 ├── src/
@@ -355,6 +358,10 @@ web/modules/custom/pokedex/
 │   │
 │   └── Service/
 │       └── PokeApiService.php       # Consume PokéAPI
+│
+├── css/
+│   ├── pokedex.css               # Estilos para listado
+│   └── pokedex_detail.css        # Estilos para detalle
 │
 └── templates/
     ├── pokedex-list.html.twig       # Template listado
@@ -388,7 +395,14 @@ dependencies:
 ## 5. Código Fuente Documentado
 
 ### 5.1 PokeApiService (Implementado)
-- ✅ Consumo de API con HttpClient
+**Métodos principales:**
+- ✅ `getPokemonList()`: Consumo de API con HttpClient
+- ✅ `getPokemonDetail()`: Obtiene detalles de un Pokémon
+- ✅ `searchPokemon()`: Búsqueda por nombre o ID (extra)
+- ✅ `getAllTypes()`: Obtiene todos los tipos disponibles (extra)
+- ✅ `getPokemonsByType()`: Filtra Pokémon por tipo (extra)
+
+**Características:**
 - ✅ Manejo de excepciones
 - ✅ Logging de errores
 - ✅ Extracción de ID desde URL
@@ -400,16 +414,46 @@ dependencies:
 - ✅ Try/catch robusto
 - ✅ Construcción de Render Arrays
 - ✅ Cálculo de paginación
+- ✅ Manejo de búsqueda y filtros (extra)
+- ✅ Attachment de libraries CSS
 
 ### 5.3 Templates Twig (Implementados)
-- ✅ pokedex-list.html.twig: Grid responsive con estados
-- ✅ pokedex-detail.html.twig: Ficha detallada con tipos
+- ✅ **pokedex-list.html.twig**: 
+  - Grid responsive con tarjetas
+  - Formularios de búsqueda y filtros
+  - Badges de tipos con colores
+  - Gradientes dinámicos según tipos
+  - Botones diseño Pokéball
+  - Estados visuales claros
+  
+- ✅ **pokedex-detail.html.twig**: 
+  - Ficha detallada con tipos
+  - Breadcrumbs de navegación
+  - Información completa del Pokémon
+  - Diseño responsive
+
+### 5.4 CSS Organizado con Libraries (Implementado)
+- ✅ **pokedex.libraries.yml**: Define las libraries del módulo
+- ✅ **css/pokedex.css**: Estilos del listado
+  - Grid responsive
+  - Tarjetas con gradientes
+  - Badges de tipos
+  - Botones Pokéball
+  - Estados visuales
+  
+- ✅ **css/pokedex_detail.css**: Estilos del detalle
+  - Layout de ficha
+  - Breadcrumbs
+  - Badges de tipos
+  - Diseño responsive
 
 ---
 
 ## 6. Flujos de Trabajo
 
 ### 6.1 Flujo Listado
+
+**Flujo normal:**
 ```
 Usuario → /pokedex?page=2
     ↓
@@ -423,11 +467,45 @@ Procesa respuesta JSON
     ↓
 Extrae IDs de URLs
     ↓
-Controller construye Render Array
+Controller construye Render Array con library CSS
     ↓
-Twig renderiza grid HTML
+Twig renderiza grid HTML con estilos
     ↓
-Usuario ve 20 Pokémon (41-60)
+Usuario ve 20 Pokémon (41-60) con tarjetas estilizadas
+```
+
+**Flujo con búsqueda:**
+```
+Usuario → /pokedex?search=pikachu
+    ↓
+Controller valida término de búsqueda
+    ↓
+Service → searchPokemon('pikachu')
+    ↓
+Service → GET pokeapi.co/api/v2/pokemon/pikachu
+    ↓
+Procesa respuesta o captura 404
+    ↓
+Controller construye Render Array con resultado único o estado 'not_found'
+    ↓
+Twig muestra resultado o mensaje "Pokémon no encontrado"
+```
+
+**Flujo con filtro por tipo:**
+```
+Usuario → /pokedex?type=fire&page=1
+    ↓
+Controller detecta parámetro 'type'
+    ↓
+Service → getPokemonsByType('fire', limit, offset)
+    ↓
+Service → GET pokeapi.co/api/v2/type/fire
+    ↓
+Procesa lista de Pokémon de ese tipo
+    ↓
+Pagina resultados
+    ↓
+Twig muestra solo Pokémon de tipo fuego
 ```
 
 ### 6.2 Flujo Detalle
@@ -486,16 +564,19 @@ Usuario puede reintentar
 ## 8. Manejo de Errores y Estados
 
 ### 8.1 Estados Implementados
-1. **success**: Datos OK
-2. **error**: Fallo API
-3. **empty**: Sin resultados
+1. **success**: Datos cargados correctamente
+2. **error**: Fallo en la API con mensaje y botón de reintento
+3. **empty**: Sin resultados para mostrar
+4. **not_found**: Pokémon buscado no existe (búsqueda específica)
 
-### 8.2 Estrategia
+### 8.2 Estrategia de Manejo
 - Try/catch en controllers
-- Excepciones específicas
-- Mensajes user-friendly
-- Logging técnico separado
-- Botones de reintento
+- Excepciones específicas capturadas
+- Mensajes user-friendly con iconos visuales
+- Logging técnico separado para debugging
+- Botones de reintento en estado error
+- Botones de navegación en todos los estados
+- Estados visuales claros con CSS
 
 ---
 
@@ -514,32 +595,80 @@ Usuario puede reintentar
 - ✅ Código limpio
 
 ### 9.2 URLs de Prueba
-- `/pokedex` → Página 1
-- `/pokedex?page=2` → Página 2
-- `/pokedex?page=3` → Página 3
-- `/pokedex/pikachu` → Detalle
+
+**Listado básico:**
+- `/pokedex` → Página 1 (Pokémon 1-20)
+- `/pokedex?page=2` → Página 2 (Pokémon 21-40)
+- `/pokedex?page=3` → Página 3 (Pokémon 41-60)
+
+**Búsqueda:**
+- `/pokedex?search=pikachu` → Búsqueda por nombre
+- `/pokedex?search=25` → Búsqueda por ID
+- `/pokedex?search=noexiste` → Estado "not found"
+
+**Filtros:**
+- `/pokedex?type=fire` → Solo Pokémon de tipo fuego
+- `/pokedex?type=water&page=2` → Página 2 de tipo agua
+- `/pokedex?type=electric` → Solo Pokémon eléctricos
+
+**Detalle:**
+- `/pokedex/pikachu` → Detalle por nombre
 - `/pokedex/25` → Detalle por ID
+- `/pokedex/charizard` → Detalle de Charizard
 
 ---
 
-## 10. Mejoras Futuras
+## 10. Mejoras Implementadas y Futuras
 
-### 10.1 Cache API
+### 10.1 ✅ Mejoras Implementadas (Funcionalidad Extra)
+
+**Búsqueda y Filtros:**
+- ✅ Búsqueda por nombre o ID de Pokémon
+- ✅ Filtro por tipo de Pokémon (Fire, Water, Electric, etc.)
+- ✅ Botón para limpiar filtros activos
+- ✅ Preservación de filtros entre páginas
+
+**UI/UX Mejorada:**
+- ✅ Drupal Libraries implementadas (CSS organizado)
+- ✅ Tarjetas con gradientes dinámicos según tipos
+- ✅ Badges de tipos con colores específicos
+- ✅ Botones con diseño Pokéball temático
+- ✅ Estados visuales claros con iconos
+- ✅ Breadcrumbs de navegación
+- ✅ Grid responsive
+
+**Arquitectura:**
+- ✅ CSS separado en archivos independientes
+- ✅ Libraries configuradas en pokedex.libraries.yml
+- ✅ Métodos adicionales en PokeApiService
+- ✅ Lógica de búsqueda y filtros en Controller
+
+### 10.2 💡 Mejoras Futuras Pendientes
+
+**Performance:**
+- 💡 Cache API para listado y detalle
 ```php
 '#cache' => [
   'max-age' => 300, // 5 minutos
-  'contexts' => ['url.query_args:page'],
-  'tags' => ['pokedex:list'],
+  'contexts' => ['url.query_args:page', 'url.query_args:type'],
+  'tags' => ['pokedex:list', 'pokedex:search'],
 ],
 ```
 
-### 10.2 Otras Mejoras
-- Búsqueda por nombre
-- Filtros por tipo
-- Favoritos con localStorage
-- Animaciones CSS
-- Tests unitarios
-- Tests funcionales
+**Funcionalidades:**
+- 💡 Favoritos del usuario con localStorage/cookies
+- 💡 Comparador de Pokémon (lado a lado)
+- 💡 Estadísticas visuales (gráficos de stats)
+- 💡 Evoluciones del Pokémon
+- 💡 Movimientos/ataques disponibles
+
+**Testing:**
+- 💡 Tests unitarios con PHPUnit
+- 💡 Tests funcionales con Behat
+- 💡 Tests de integración de API
+
+**Optimización:**
+- 💡 Lazy loading de imágenes
 
 ---
 
